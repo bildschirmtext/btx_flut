@@ -46,14 +46,20 @@ int main(int argc, char *argv[])
 	int x=0;
 	char *line=NULL;
 	size_t as=0;
-	for (y=0; y<height; y++) {
+	while(y<height) {
 		size_t s=getline(&line, &as, stdin);
-		for (x=0; x<width; x++) {
-			int p=0;
+		if (line[0]=='#') continue;
+		x=0;
+		while (x<width) {
+			int p=-1;
 			if ((line[x]>='0') && (line[x]<='9')) p=line[x]-'0'; else
 			if ((line[x]<='A') && (line[x]<='Z')) p=line[x]-'A'+10;
-			image[y*MAXWIDTH+x]=p;
+			if (p>=0) {
+				image[y*MAXWIDTH+x]=p;
+				x=x+1;
+			}
 		}
+		y=y+1;
 	}
 
 	fprintf(stderr, "Width: %d characters, Height: %d characters\n", width/2, height/3);
@@ -72,7 +78,6 @@ int main(int argc, char *argv[])
 		int fg=-1;
 		int bg=-1;
 		gotoxy(0,y);
-		printf("%02d ", y);
 		for (x=0; x<width/2; x++) {
 			//Write sextet for character
 			uint8_t pixels[6];
@@ -119,7 +124,6 @@ int main(int argc, char *argv[])
 				second=first;
 				first=t;
 			}
-			fprintf(stderr,"f=%02x s=%02x\n", first, second);
 			set_fgcolor(first, &fg);
 			set_bgcolor(second, &bg);
 
@@ -127,13 +131,11 @@ int main(int argc, char *argv[])
 			for (n=0; n<6; n++) {
 				if (pixels[n]!=bg) v=v| (1<<n); 
 			}
-			fprintf(stderr, "%02x ", v);
 			if (v==0x00) printf(" "); else
 			if (v<0x20) printf("%c", (v&0x1f)+0xA0); else
 			if (v==0x3f) printf("\xDF"); else
 			printf("%c", (v&0x1f)+0xE0);
 		}
-		fprintf(stderr,"\n");
 	}
 
 }
